@@ -1,0 +1,71 @@
+　　　　　　　　　　　　　　　　git操作文档
+
+书写人：孙志强
+
+
+
+软件环境准备：Git-2.20.1-64-bit 已经上传到钉钉群里，可以自行下载。
+
+安装步骤：按照正常的步骤点击正常往下执行即可。
+
+安装完成后，先确定一个存放和上传文件的文件夹，在这个文件夹右键打开git bash here
+就会出现一个类似于linux的交互页面，然后可以在里面输入指令
+1.首先 要设置一下自己的邮箱和用户名：
+输入指令：
+$ git config --global user.email "邮箱名称"
+$ git config --global user.name "用户名"
+2.本地的仓库和远程仓库已经配置完成，想要和远程的仓库建立链接，需要如下准备：
+访问远程仓库的机器，需要生成自己的秘钥，生成秘钥指令： ssh-keygen -t rsa -C "自己设置的邮箱地址" 直接回车下去到结束即可
+在安装git的家目录的.ssh目录下有两个文件，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+然后把公钥告诉我，我在GitHub的地址上把公钥给设置好，这样就能和远程的仓库建立链接，可以修改里面的内容了。
+验证能不能和github建立链接的方式是输入下面指令：ssh -T git@github.com 如果失败 说明生成的秘钥有问题，需要重新配置。
+3.建立链接之后，就可以从远程仓库拉取文件了，指令是：git pull origin master 就是从远程仓库的主分支拉取文件
+如果是其他分支，改分支名即可 git pull origin 分支名
+
+一般更新文件的步骤是：一种是在主分支中直接更新文件，在更新文件后 在更新文件的文件夹下输入指令：git add 文件名 然后git commit -m "自定义的名称"  不要和别人重复了就行 
+名字规范一点比较好，体现是谁更新的，什么时间最好 最后把结果同步到远程仓库中 git push -u origin master 
+如果想要同步远程仓库的更新：git pull origin master 建议更新之前，把仓库最新的一份更新同步过来，然后再进行操作。
+
+另外一种就是创建自己的自定义分支，每个人都有自己的分支，在自己的分支更新自己的文件，然后再把文件合并到主分支中
+
+首先，我们创建dev分支，然后切换到dev分支:$ git checkout -b dev  这个相当于两条指令：$ git branch dev $it checkout dev
+然后，用git branch命令查看当前分支：$ git branch
+然后提交：
+$ git add readme.txt 
+$ git commit -m "branch test"
+现在，dev分支的工作完成，我们就可以切换回master分支
+$ git checkout master
+现在，我们把dev分支的工作成果合并到master分支上：
+$ git merge dev
+合并完成后，就可以放心地删除dev分支了：$ git branch -d dev
+删除后，查看branch，就只剩下master分支了：$ git branch
+* master
+在git常用到的就是版本回退，因为日志中保留着文件的修改记录，所以可以回退到存着修改记录的任意版本
+ git reset --hard HEAD^/HEAD~1 都是最新版本之前的一个版本
+ git reflog 查看之前的操作记录 用于恢复文件
+git reset --hard 版本序列号
+
+
+工作区 暂存区
+git add 就是把文件修改添加到暂存区，不add，git没办法管理文件的文件的内容
+git commit 就是一次性把暂存区的修改记录都给上传成为一个版本号
+
+git status 查看文件的改动
+
+git reset HEAD  file 可以把暂存区的修改撤销掉，重新放回工作区
+git  checkout -- code.txt  来丢弃文件的改动
+
+没有放到暂存区，直接执行 git  checkout -- code.txt  来丢弃文件的改动
+
+git diff HEAD -- code.txt
+--对应是前面版本的文件
+++是工作区的文件
+git diff HEAD HEAD^ --  code.txt
+git log --pretty=oneline 日志简短的显示
+
+
+一般改动先是在工作区，然后再把改动放到暂存区
+git rm code2.txt 删除改动放到了暂存区
+git status
+git commit -m   '删除文件code2.txt'
+
