@@ -1,0 +1,54 @@
+SUM(a.is_Acct) pz_acct_sum,
+SUM(b.is_Acct) gc_Acct_sum,
+SUM(CASE WHEN a.is_Acct='1' AND b.is_Acct='1' THEN 1 ELSE 0 END 
+)
+SUM(c.total_Fee)
+SUM(d.total_fee)
+
+(
+(SELECT NVL(USER_ID_CBSS,USER_ID) USER_ID_NEW
+FROM 
+(SELECT /* + PARALLEL (T, 2)*/
+         T.USER_ID, --USER_ID 与USER_ID_OLD的关系，1、23G用户,USER_ID=''B''||USER_ID_OLD ; 2、4G用户,USER_ID=''A''||USER_ID_OLD
+         T.SERVICE_TYPE,
+
+         is_Acct
+          FROM ZBG_DWA.DWA_V_M_CUS_NM_USER_INFO_'||V_PROV||'@LINK_DSSDWE T
+         WHERE MONTH_ID = '''||V_MONTH_ID_pz||'''
+           AND IS_STAT = ''1'') a,
+           (SELECT 'B'||USER_ID_PROV USER_ID_PROV,'A'||USER_ID_CBSS USER_ID_CBSS
+            FROM
+            ZBG_DWD.DWD_M_PRD_CB_USER_LIST_011
+            WHERE MONTH_ID='201811'
+            AND CYCLE_ID <= '201811'
+            AND CYCLE_ID > '201712')AA
+            WHERE A.USER_ID=AA.USER_ID_PROV(+))
+                      LEFT JOIN 
+           
+(SELECT USER_ID, TOTAL_FEE
+          FROM ZBG_DWA.DWA_V_M_CUS_NM_CHARGE_'||V_PROV||'@LINK_DSSDWE
+         WHERE MONTH_ID = '''||V_MONTH_ID_pz||''') c) a
+           
+           FULL JOIN 
+          ( 
+          
+           (SELECT /* + PARALLEL (T, 2)*/
+         T.USER_ID, --USER_ID 与USER_ID_OLD的关系，1、23G用户,USER_ID=''B''||USER_ID_OLD ; 2、4G用户,USER_ID=''A''||USER_ID_OLD
+         T.SERVICE_TYPE,
+
+         is_Acct
+          FROM ZBG_DWA.DWA_V_M_CUS_NM_USER_INFO_'||V_PROV||'@LINK_DSSDWE T
+         WHERE MONTH_ID = '''||V_MONTH_ID_gc||'''
+           AND IS_STAT = ''1'') b
+
+         
+         
+           LEFT JOIN
+           
+           
+(SELECT USER_ID, TOTAL_FEE
+          FROM ZBG_DWA.DWA_V_M_CUS_NM_CHARGE_'||V_PROV||'@LINK_DSSDWE
+         WHERE MONTH_ID = '''||V_MONTH_ID_GC||''') d) b
+         a=b
+         
+         
